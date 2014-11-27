@@ -12,6 +12,8 @@
 
 #define NUM_THREADS 4
 
+
+//This should be a struct instead of global variables
 char* outboard; 
 char* inboard;
 int nrows;
@@ -19,7 +21,6 @@ int ncols;
 int gens_max;
 
 int LDA;
-int curgen;
 
 pthread_t *threads; 
 sem_t sem[NUM_THREADS];
@@ -39,7 +40,8 @@ void golWorker(void * arg)
 {
     int row = *((int*) arg);
     int i,j;
-    for (curgen = 0; curgen < gens_max; curgen++)
+    int localgen;
+    for (localgen = 0; localgen < gens_max; localgen++)
     {
         sem_wait(&sem[row]);
         /* HINT: you'll be parallelizing these loop(s) by doing a
@@ -106,9 +108,6 @@ sequential_game_of_life (char* outboard_,
 
     for( i = 0; i < gens_max; i++)
     {
-        printf("%d\n",i);
-
-       fflush(stdout); 
         sem_wait(&sem[0]);
         sem_wait(&sem[1]);
         sem_wait(&sem[2]);
