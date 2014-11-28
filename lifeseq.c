@@ -83,7 +83,6 @@ void golWorker(void * arg)
 
         sem_post(&sem_finish[tid]);
     }
-
     free(arg);
 }
 
@@ -118,7 +117,6 @@ void golWorker2(void * arg)
                 BOARD(outboard, i, j) = alivep (neighbor_count, BOARD (inboard, i, j));
             }
         }
-        free(arg);
 }
 
 char*
@@ -137,19 +135,30 @@ sequential_game_of_life (char* outboard_,
        nrows! */
     LDA = nrows;
     int i, j;
+    int arg0  = 0;
+    int arg1  = 1;
+    int arg2  = 2;
+    int arg3  = 3;
+
     for(i = 0; i < gens_max; i++)
     {
+      /*
       for(j = 0; j < NUM_THREADS; j++)
       {
           int *arg = (int*)malloc(sizeof(int));
           *arg = j;
           pthread_create(&threads[j], NULL, golWorker2,(void*) arg);
-      }
+      }*/
 
-      for (j = 0; j < NUM_THREADS; j++)
-      {
-        pthread_join(threads[j], NULL);
-      }
+          pthread_create(&threads[0], NULL, golWorker2,(void*) &arg0);
+          pthread_create(&threads[1], NULL, golWorker2,(void*) &arg1);
+          pthread_create(&threads[2], NULL, golWorker2,(void*) &arg2);
+          pthread_create(&threads[3], NULL, golWorker2,(void*) &arg3);
+
+      pthread_join(threads[0], NULL);
+      pthread_join(threads[1], NULL);
+      pthread_join(threads[2], NULL);
+      pthread_join(threads[3], NULL);
 
       SWAP_BOARDS( outboard, inboard );
     }
