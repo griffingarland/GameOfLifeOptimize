@@ -94,17 +94,47 @@ void golWorker2(void * arg)
     int i,j;
     int row_start = tid*nrows/NUM_THREADS;
     int row_end = row_start + nrows/NUM_THREADS;
+    int inorth, isouth, jwest, jeast;
+    char neighbor_count;
 
         for (i = row_start; i < row_end; i++)
         {
             for (j = 0; j < ncols; j++)
             {
-                const int inorth = mod (i-1, nrows);
-                const int isouth = mod (i+1, nrows);
-                const int jwest = mod (j-1, ncols);
-                const int jeast = mod (j+1, ncols);
+              
+               if ( i == 0 )
+               {
+                    inorth = nrows-1;
+                    isouth = i + 1;
+               }
+               else if ( i == nrows-1 )
+               {
+                 inorth = i - 1;
+                 isouth = 0;
+               }
+               else
+               {
+                 inorth = i - 1;
+                 isouth = i + 1;
+               }
 
-                const char neighbor_count = 
+               if (j == 0) 
+               {
+                 jwest = ncols - 1;
+                 jeast = j + 1;
+               }
+               else if (j == ncols - 1)
+               {
+                 jwest = j - 1;
+                 jeast = 0;
+               }
+               else
+               {
+                 jwest = j - 1;
+                 jeast = j + 1;
+               }
+
+                neighbor_count = 
                     BOARD (inboard, inorth, jwest) + 
                     BOARD (inboard, inorth, j) + 
                     BOARD (inboard, inorth, jeast) + 
