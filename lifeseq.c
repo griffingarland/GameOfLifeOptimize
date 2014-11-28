@@ -12,18 +12,13 @@
 
 #define NUM_THREADS 4
 
+typedef struct {
+ int nrows;
+ int ncols;
+ int gens_max;
+ int thread_id;
+} Args;
 
-//This should be a struct instead of global variables
-char* outboard; 
-char* inboard;
-int nrows;
-int ncols;
-int gens_max;
-
-int LDA;
-
-pthread_t *threads; 
-sem_t sem[NUM_THREADS];
 /**
  * Swapping the two boards only involves swapping pointers, not
  * copying values.
@@ -36,17 +31,32 @@ sem_t sem[NUM_THREADS];
 
 #define BOARD( __board, __i, __j )  (__board[(__i) + LDA*(__j)])
 
+char* outboard; 
+char* inboard;
+
+int LDA;
+
+pthread_t threads[NUM_THREADS];
+sem_t sem_start[NUM_THREADS];
+sem_t sem_finish[NUM_THREADS];
+
 void golWorker(void * arg)
 {
-    int row = *((int*) arg);
+    Args *args = (Args *) arg; 
+    int tid = args->thread_id;
+    int nrows = args->nrows;
+    int ncols = args->ncols;
+    int gen_max = args->gens_max;
     int i,j;
     int localgen;
-    for (localgen = 0; localgen < gens_max; localgen++)
+    int row_start = tid*nrows/NUM_THREADS;
+    int row_end = row_start + nrows/NUM_THREADS;
+
+    for (localgen = 0; localgen < gen_max; localgen++)
     {
-        sem_wait(&sem[row]);
-        /* HINT: you'll be parallelizing these loop(s) by doing a
-           geometric decomposition of the output */
-        for (i = row*nrows/4; i < nrows/4+row*nrows; i++)
+        sem_wait(&sem_start[tid]);
+
+        for (i = row_start; i < row_end; i++)
         {
             for (j = 0; j < ncols; j++)
             {
@@ -66,60 +76,57 @@ void golWorker(void * arg)
                     BOARD (inboard, isouth, jeast);
 
                 BOARD(outboard, i, j) = alivep (neighbor_count, BOARD (inboard, i, j));
-
             }
         }
-        sem_post(&sem[row]);
+
+        sem_post(&sem_finish[tid]);
     }
+
+    free(arg);
 }
 
 
-    char*
+char*
 sequential_game_of_life (char* outboard_, 
         char* inboard_,
-        const int nrows_,
-        const int ncols_,
-        const int gens_max_)
+        const int nrows,
+        const int ncols,
+        const int gens_max)
 {
     outboard = outboard_;
-    inboard= inboard_;
-    nrows =  nrows_;
-    ncols = ncols_;
-    gens_max = gens_max_;
+    inboard = inboard_;
     
-    sem_init(&sem[0],0,1);
-    sem_init(&sem[1],0,1);
-    sem_init(&sem[2],0,1);
-    sem_init(&sem[3],0,1);
-    
-    threads = (pthread_t*) malloc(sizeof(pthread_t)*NUM_THREADS);
     /* HINT: in the parallel decomposition, LDA may not be equal to
        nrows! */
     LDA = nrows;
     int i;
 
-    
     for(i = 0; i < NUM_THREADS; i++)
     {
-        int *arg = (int*)malloc(sizeof(int));
-        * arg = i;
-        pthread_create(&threads[i], NULL, golWorker,(void*) arg);
+        Args *args = (Args*)malloc(sizeof(Args));
+        args->thread_id = i;
+        args->nrows = nrows;
+        args->ncols = ncols;
+        args->gens_max = gens_max;
+
+        pthread_create(&threads[i], NULL, golWorker,(void*) args);
+        sem_init(&sem_start[i], 0, 1);
+        sem_init(&sem_finish[i], 0, 0);
     }
 
-    for( i = 0; i < gens_max; i++)
+    for(i = 0; i < gens_max; i++)
     {
-        sem_wait(&sem[0]);
-        sem_wait(&sem[1]);
-        sem_wait(&sem[2]);
-        sem_wait(&sem[3]);
+        sem_wait(&sem_finish[0]);
+        sem_wait(&sem_finish[1]);
+        sem_wait(&sem_finish[2]);
+        sem_wait(&sem_finish[3]);
 
         SWAP_BOARDS( outboard, inboard );
         
-        sem_post(&sem[0]);
-        sem_post(&sem[1]);
-        sem_post(&sem[2]);
-        sem_post(&sem[3]);
-        
+        sem_post(&sem_start[0]);
+        sem_post(&sem_start[1]);
+        sem_post(&sem_start[2]);
+        sem_post(&sem_start[3]);
     }
 
         /* 
