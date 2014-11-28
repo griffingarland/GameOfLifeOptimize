@@ -46,7 +46,7 @@ void golWorker(void * arg)
         sem_wait(&sem[row]);
         /* HINT: you'll be parallelizing these loop(s) by doing a
            geometric decomposition of the output */
-        for (i = 0; i < nrows/4+row*nrows; i++)
+        for (i = row*nrows/4; i < nrows/4+row*nrows; i++)
         {
             for (j = 0; j < ncols; j++)
             {
