@@ -6,7 +6,6 @@
 #include "life.h"
 #include "util.h"
 #include <pthread.h>
-#include <semaphore.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -24,23 +23,19 @@
 #define BOARD( __board, __i, __j )  (__board[(__i) + LDA*(__j)])
 
 typedef struct {
-// int nrows;
-// int ncols;
- int thread_id;
+    int nrows;
+    int ncols;
+    int thread_id;
 } Args;
 
 char *outboard;
 char *inboard;
 
-int nrows_g, ncols_g;
-
 void golWorker(void * arg)
 {
     Args *args = (Args*) arg; 
-    //int nrows = args->nrows;; 
-    //int ncols = args->ncols; 
-    int nrows = nrows_g;
-    int ncols = ncols_g;
+    int nrows = args->nrows;; 
+    int ncols = args->ncols; 
     int tid = args->thread_id;
     int LDA = nrows;
     int i,j;
@@ -53,38 +48,38 @@ void golWorker(void * arg)
     {
         for (i = row_start; i < row_end; i++)
         {
-               if ( i == 0 )
-               {
-                    inorth = nrows-1;
-                    isouth = i + 1;
-               }
-               else if ( i == nrows-1 )
-               {
-                 inorth = i - 1;
-                 isouth = 0;
-               }
-               else
-               {
-                 inorth = i - 1;
-                 isouth = i + 1;
-               }
+            if ( i == 0 )
+            {
+                inorth = nrows-1;
+                isouth = i + 1;
+            }
+            else if ( i == nrows-1 )
+            {
+                inorth = i - 1;
+                isouth = 0;
+            }
+            else
+            {
+                inorth = i - 1;
+                isouth = i + 1;
+            }
 
-              if (j == 0) 
-              {
+            if (j == 0) 
+            {
                 jwest = ncols - 1;
                 jeast = j + 1;
-              }
-                else if (j == ncols - 1)
-              {
+            }
+            else if (j == ncols - 1)
+            {
                 jwest = j - 1;
                 jeast = 0;
-              }
-              else
-              {
+            }
+            else
+            {
                 jwest = j - 1;
                 jeast = j + 1;
-              }
-                neighbor_count = 
+            }
+            neighbor_count = 
                     BOARD (inboard, inorth, jwest) + 
                     BOARD (inboard, inorth, j) + 
                     BOARD (inboard, inorth, jeast) + 
@@ -94,7 +89,7 @@ void golWorker(void * arg)
                     BOARD (inboard, isouth, j) + 
                     BOARD (inboard, isouth, jeast);
 
-                BOARD(outboard, i, j) = alivep (neighbor_count, BOARD (inboard, i, j));
+           BOARD(outboard, i, j) = alivep (neighbor_count, BOARD (inboard, i, j));
       }
    }
 }
@@ -111,15 +106,13 @@ sequential_game_of_life (char* outboard_,
     int i, j;
     outboard = outboard_;
     inboard = inboard_;
-    nrows_g = nrows;
-    ncols_g = ncols;
     pthread_t threads[NUM_THREADS];
     Args args[NUM_THREADS];
 
     for (i = 0; i < NUM_THREADS; i++)
     {
-    //    args[i].nrows = nrows;
-    //    args[i].ncols = ncols;
+        args[i].nrows = nrows;
+        args[i].ncols = ncols;
         args[i].thread_id = i;
     }
 
@@ -140,5 +133,3 @@ sequential_game_of_life (char* outboard_,
 
     return inboard;
 }
-
-
