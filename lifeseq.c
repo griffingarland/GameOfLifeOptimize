@@ -42,6 +42,7 @@ sem_t sem_finish[NUM_THREADS];
 
 int nrows_g, ncols_g;
 
+/*
 void golWorker(void * arg)
 {
     Args *args = (Args *) arg; 
@@ -84,7 +85,7 @@ void golWorker(void * arg)
         sem_post(&sem_finish[tid]);
     }
     free(arg);
-}
+} */
 
 void golWorker2(void * arg)
 {
@@ -97,11 +98,10 @@ void golWorker2(void * arg)
     int inorth, isouth, jwest, jeast;
     char neighbor_count;
 
+    for (j = 0; j < ncols; j++)
+    {
         for (i = row_start; i < row_end; i++)
         {
-            for (j = 0; j < ncols; j++)
-            {
-              
                if ( i == 0 )
                {
                     inorth = nrows-1;
@@ -118,22 +118,21 @@ void golWorker2(void * arg)
                  isouth = i + 1;
                }
 
-               if (j == 0) 
-               {
-                 jwest = ncols - 1;
-                 jeast = j + 1;
-               }
-               else if (j == ncols - 1)
-               {
-                 jwest = j - 1;
-                 jeast = 0;
-               }
-               else
-               {
-                 jwest = j - 1;
-                 jeast = j + 1;
-               }
-
+              if (j == 0) 
+              {
+                jwest = ncols - 1;
+                jeast = j + 1;
+              }
+                else if (j == ncols - 1)
+              {
+                jwest = j - 1;
+                jeast = 0;
+              }
+              else
+              {
+                jwest = j - 1;
+                jeast = j + 1;
+              }
                 neighbor_count = 
                     BOARD (inboard, inorth, jwest) + 
                     BOARD (inboard, inorth, j) + 
@@ -145,8 +144,8 @@ void golWorker2(void * arg)
                     BOARD (inboard, isouth, jeast);
 
                 BOARD(outboard, i, j) = alivep (neighbor_count, BOARD (inboard, i, j));
-            }
-        }
+      }
+   }
 }
 
 char*
