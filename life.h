@@ -20,7 +20,7 @@ game_of_life (char* outboard,
  * parallelized.  Useful for checking output.
  */
 char*
-sequential_game_of_life (char* outboard, 
+parallel_game_of_life (char* outboard, 
 			 char* inboard,
 			 const int nrows,
 			 const int ncols,

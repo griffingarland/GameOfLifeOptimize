@@ -95,7 +95,7 @@ void golWorker(void * arg)
 }
 
 char*
-sequential_game_of_life (char* outboard_, 
+parallel_game_of_life (char* outboard_, 
         char* inboard_,
         const int nrows,
         const int ncols,
