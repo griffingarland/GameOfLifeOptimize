@@ -46,6 +46,23 @@ void golWorker(void * arg)
 
     for (j = 0; j < ncols; j++)
     {
+
+        if (j == 0) 
+        {
+            jwest = ncols - 1;
+            jeast = j + 1;
+        }
+        else if (j == ncols - 1)
+        {
+            jwest = j - 1;
+            jeast = 0;
+        }
+        else
+        {
+            jwest = j - 1;
+            jeast = j + 1;
+        }
+
         for (i = row_start; i < row_end; i++)
         {
             if ( i == 0 )
@@ -64,21 +81,6 @@ void golWorker(void * arg)
                 isouth = i + 1;
             }
 
-            if (j == 0) 
-            {
-                jwest = ncols - 1;
-                jeast = j + 1;
-            }
-            else if (j == ncols - 1)
-            {
-                jwest = j - 1;
-                jeast = 0;
-            }
-            else
-            {
-                jwest = j - 1;
-                jeast = j + 1;
-            }
             neighbor_count = 
                     BOARD (inboard, inorth, jwest) + 
                     BOARD (inboard, inorth, j) + 
