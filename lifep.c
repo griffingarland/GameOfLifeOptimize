@@ -22,6 +22,7 @@
 
 #define BOARD( __board, __i, __j )  (__board[(__i) + LDA*(__j)])
 
+//struct to be passed into the forked workers as an argument
 typedef struct {
     int nrows;
     int ncols;
@@ -81,14 +82,14 @@ void golWorker(void * arg)
                 isouth = i + 1;
             }
 
+			//Reordered to prefetch cache hits
             neighbor_count = 
-                    
                     BOARD (inboard, i, jwest) +
-                    BOARD (inboard, isouth, jwest) +
 					BOARD (inboard, inorth, jwest) + 
-                    BOARD (inboard, inorth, j) + 
+                    BOARD (inboard, isouth, jwest) +
+					BOARD (inboard, i, jeast) + 
+					BOARD (inboard, inorth, j) + 
                     BOARD (inboard, inorth, jeast) + 
-                    BOARD (inboard, i, jeast) + 
                     BOARD (inboard, isouth, j) + 
                     BOARD (inboard, isouth, jeast);
 
