@@ -82,12 +82,13 @@ void golWorker(void * arg)
             }
 
             neighbor_count = 
-                    BOARD (inboard, inorth, jwest) + 
+                    
+                    BOARD (inboard, i, jwest) +
+                    BOARD (inboard, isouth, jwest) +
+					BOARD (inboard, inorth, jwest) + 
                     BOARD (inboard, inorth, j) + 
                     BOARD (inboard, inorth, jeast) + 
-                    BOARD (inboard, i, jwest) +
                     BOARD (inboard, i, jeast) + 
-                    BOARD (inboard, isouth, jwest) +
                     BOARD (inboard, isouth, j) + 
                     BOARD (inboard, isouth, jeast);
 
@@ -130,6 +131,7 @@ parallel_game_of_life (char* outboard_,
         pthread_join(threads[2], NULL);
         pthread_join(threads[3], NULL);
 
+		//Next generation
         SWAP_BOARDS( outboard, inboard );
     }
 
